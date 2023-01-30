@@ -89,3 +89,4 @@ while run:
         show_sales()
     elif i == 'exit':
         run = False
+
