@@ -1,7 +1,7 @@
 # Подключается к БД любого типа на ваш выбор (например, к PostgreSQL). +
 # Импортирует необходимые модели данных. +
 # Принимает имя или идентификатор издателя (publisher), например через input(). Выводит построчно факты покупки книг этого издателя:
-
+import os
 import sqlalchemy
 import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -36,7 +36,7 @@ class Stock(Base):
     id = sq.Column(sq.Integer, primary_key=True)
     id_book = sq.Column(sq.Integer, sq.ForeignKey('book.id'), nullable=False)
     id_shop = sq.Column(sq.Integer, sq.ForeignKey('shop.id'), nullable=False)
-    count = sq.Column(sq.Integer,nullable=False)
+    count = sq.Column(sq.Integer, nullable=False)
 
 class Sale(Base):
     _tablename__ = "sale"
@@ -60,6 +60,9 @@ create_tables(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
+folder = os.getcwd()
+files = os.listdir()
+
 def load_data():
     pass
 
@@ -69,14 +72,12 @@ def show_sales():
 run = True
 def show_help():
     print('''
-    load - load data from datasets
     help - show help
+    load - load data from datasets
     sales - show sales
     exit - exit
     ''')
     return
-
-
 
 while run:
     i = input('Введите команду (h- помощь): ')
