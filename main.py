@@ -2,10 +2,12 @@
 # Импортирует необходимые модели данных. +
 # Принимает имя или идентификатор издателя (publisher), например через input(). Выводит построчно факты покупки книг этого издателя:
 import os
+import pprint
 import sqlalchemy
 import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
+pp
 Base = declarative_base()
 
 
@@ -48,7 +50,6 @@ class Sale(Base):
     count = sq.Column(sq.Integer,nullable=False)
 
 
-
 def create_tables(engine):
     # Base.metadata.drop_all(engine)
     Base.metadata.create_all(engine)
@@ -60,11 +61,27 @@ create_tables(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
-folder = os.getcwd()
-files = os.listdir()
+
+
+
+
 
 def load_data():
-    pass
+    folder = os.getcwd()
+    files = os.listdir()
+    for file in files:
+        if 'sales.csv' in file and file != target.name:
+            path_to_file = os.path.join(folder, file)
+            with open(path_to_file, 'rt', encoding='utf-8') as f:
+                rows = []
+                count = 0
+                for line in f:
+                    rows.append(line.rstrip('\n'))
+                    count += 1
+                res.append({'file_name': file,
+                            'count_rows': count,
+                            'rows': rows})
+            f.close()
 
 def show_sales():
     pass
@@ -72,16 +89,16 @@ def show_sales():
 run = True
 def show_help():
     print('''
-    help - show help
-    load - load data from datasets
-    sales - show sales
-    exit - exit
+    help    - показать помощь
+    load    - загрузить данные из datasets
+    sales   - показать продажи по автору
+    exit    - выход
     ''')
     return
 
 while run:
-    i = input('Введите команду (h- помощь): ')
-    if i == 'c':
+    i = input('Введите команду (help - помощь): ')
+    if i == 'load':
         load_data()
     elif i == 'help':
         show_help()
