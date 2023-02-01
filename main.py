@@ -11,8 +11,10 @@ from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 
 Base = declarative_base()
 
+
 class Publisher(Base):
-    __table__ = 'publisher'
+    __tablename___ = "publisher"
+
     id = sq.Column(sq.Integer, primary_key=True)
     name = sq.Column(sq.String(length=60), unique=True)
 
@@ -64,12 +66,13 @@ def create_tables(engine, command):
         Base.metadata.drop_all(engine)
 
 
-# DSN = "postgresql://postgres:postgres@localhost:5432/ormdb"
-DSN = 'jdbc://postgres:postgres@localhost:5432/ormdb'
+DSN = "postgresql://postgres:postgres@localhost:5432/ormdb"
+# DSN = 'jdbc://postgres:postgres@localhost:5432/ormdb'
 engine = sqlalchemy.create_engine(DSN)
 create_tables(engine, 'create')
 Session = sessionmaker(bind=engine)
 session = Session()
+
 
 def load_data():
     os.chdir('fixtures')
@@ -89,9 +92,10 @@ def load_data():
     #             for line in f:
     #                 rows.append(line.rstrip('\n'))
 
-            # f.close()
+    # f.close()
 
     pprint(publisher_xl)
+
 
 def show_sales():
     pass
