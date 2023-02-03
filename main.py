@@ -1,9 +1,9 @@
 # Подключается к БД любого типа на ваш выбор (например, к PostgreSQL). +
 # Импортирует необходимые модели данных. +
 # Принимает имя или идентификатор издателя (publisher), например через input(). Выводит построчно факты покупки книг этого издателя:
-import os
-import pandas as pd
-import pprint
+# import os
+# import pandas as pd
+# import pprint
 
 import sqlalchemy
 import sqlalchemy as sq
@@ -13,11 +13,10 @@ Base = declarative_base()
 
 
 class Publisher(Base):
-    __tablename___ = "publisher"
+    __tablename__ = "publisher"
 
     id = sq.Column(sq.Integer, primary_key=True)
     name = sq.Column(sq.String(length=60), unique=True)
-
 
 class Book(Base):
     __tablename__ = "book"
@@ -54,8 +53,9 @@ class Sale(Base):
     id = sq.Column(sq.Integer, primary_key=True)
     price = sq.Column(sq.Integer, nullable=False)
     date_sale = sq.Column(sq.Date, nullable=False)
-    id_stock = sq.Column(sq.Integer, sq.ForeignKey('stock'), nullable=False)
+    id_stock = sq.Column(sq.Integer, sq.ForeignKey('stock.id'), nullable=False)
     count = sq.Column(sq.Integer, nullable=False)
+
     stock = relationship(Stock, backref='sale')
 
 
@@ -66,7 +66,7 @@ def create_tables(engine, command):
         Base.metadata.drop_all(engine)
 
 
-DSN = "postgresql://postgres:postgres@localhost:5432/ormdb"
+DSN = "postgresql+psycopg2://postgres:postgres@localhost:5432/ormdb"
 # DSN = 'jdbc://postgres:postgres@localhost:5432/ormdb'
 engine = sqlalchemy.create_engine(DSN)
 create_tables(engine, 'create')
@@ -74,35 +74,21 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
-def load_data():
-    os.chdir('fixtures')
-    # folder = os.getcwd()
-
-    publisher_xl = pd.read_excel('Dataset.xlsx', sheet_name='publisher')
-    shop_xl = pd.read_excel('Dataset.xlsx', sheet_name='shop')
-    book_xl = pd.read_excel('Dataset.xlsx', sheet_name='book')
-    stock_xl = pd.read_excel('Dataset.xlsx', sheet_name='stock')
-    sale_xl = pd.read_excel('Dataset.xlsx', sheet_name='sale')
-    # files = os.listdir()
-    # for file in files:
-    #     if 'sales.csv' in file:
-    #         path_to_file = os.path.join(folder, file)
-    #         with open(path_to_file, 'rt', encoding='utf-8') as f:
-    #             rows = []
-    #             for line in f:
-    #                 rows.append(line.rstrip('\n'))
-
-    # f.close()
-
-    pprint(publisher_xl)
+# def load_data():
+#     os.chdir('fixtures')
+#     # folder = os.getcwd()
+#
+#     publisher_xl = pd.read_excel('Dataset.xlsx', sheet_name='publisher')
+#     shop_xl = pd.read_excel('Dataset.xlsx', sheet_name='shop')
+#     book_xl = pd.read_excel('Dataset.xlsx', sheet_name='book')
+#     stock_xl = pd.read_excel('Dataset.xlsx', sheet_name='stock')
+#     sale_xl = pd.read_excel('Dataset.xlsx', sheet_name='sale')
+#
+#     pprint(publisher_xl)
 
 
 def show_sales():
     pass
-
-
-run = True
-
 
 def show_help():
     print('''
@@ -115,13 +101,13 @@ def show_help():
     ''')
     return
 
-
+run = True
 while run:
     i = input('Введите команду (help - помощь): ')
-    if i == 'load':
-        load_data()
-    elif i == 'create':
+    if i == 'create':
         create_tables(engine, 'create')
+    # elif i == 'load':
+    #     load_data()
     elif i == 'drop':
         create_tables(engine, 'drop')
     elif i == 'help':
