@@ -1,10 +1,9 @@
 # Подключается к БД любого типа на ваш выбор (например, к PostgreSQL). +
 # Импортирует необходимые модели данных. +
-# Принимает имя или идентификатор издателя (publisher), например через input(). Выводит построчно факты покупки книг этого издателя:
+# Принимает имя или идентификатор издателя (publisher), например через input().
+# Выводит построчно факты покупки книг этого издателя:
 
 import os
-import pandas as pd
-import pprint
 import json
 
 import sqlalchemy
@@ -19,6 +18,7 @@ class Publisher(Base):
 
     id = sq.Column(sq.Integer, primary_key=True)
     name = sq.Column(sq.String(length=60), unique=True)
+
 
 class Book(Base):
     __tablename__ = "book"
@@ -69,7 +69,6 @@ def create_tables(engine, command):
 
 
 DSN = "postgresql+psycopg2://postgres:postgres@localhost:5432/ormdb"
-# DSN = 'jdbc://postgres:postgres@localhost:5432/ormdb'
 engine = sqlalchemy.create_engine(DSN)
 create_tables(engine, 'create')
 Session = sessionmaker(bind=engine)
@@ -92,29 +91,25 @@ def load_data_from_json():
             'sale': Sale,
         }[record.get('model')]
         session.add(model(id=record.get('pk'), **record.get('fields')))
-    session.commit()
+    try:
+        session.commit()
+    except:
+        print('error import data')
 
 
-# def show_sales(publ):
-def show_sales():
+def show_sales(publish):
+    q = session.query(Book.title, Shop.name, Sale.price, Sale.date_sale) \
+        .join(Stock, Sale.id_stock == Stock.id) \
+        .join(Book, Book.id == Stock.id_book) \
+        .join(Shop, Shop.id == Stock.id_shop) \
+        .join(Publisher, Publisher.id == Book.id_publisher) \
+        .filter(Publisher.name.ilike(publish)) \
+        .all()
 
-    # q = session.query(Book.title, Shop.name, sum(Sale.count), Sale.date_sale).join(Stock.sale)\
-    # .join(Book.stock)\
-    # .join(Shop.stock)\
-    # .join(Publisher.book)\
-    # .group_by(Publisher.name)\
-    # .filter(Publisher.name == publ)
-    # for s in q.all():
-    #     print('название книги | название магазина| стоимость покупки | дата покупки')
-    #     pprint(s)
-    q = session.query(Stock)
-    print(q)
-    for s in q.all():
-        print('название книги | название магазина| стоимость покупки | дата покупки')
-        print(s)
-        for i in s:
-            pprint(i.date_sale, i.price)
-
+    print('название книги | название магазина| стоимость покупки | дата покупки')
+    for s in q:
+        print(s.title, '|', s.name, '|', s.price, '|', s.date_sale.strftime("%d-%m-%Y"))
+        # print(s)
 
 
 def show_help():
@@ -122,11 +117,13 @@ def show_help():
     help    - показать помощь
     create  - создать таблицы
     drop    - удалить таблицы и все данные
+    do-all  - создать, удалить таблицы, загрузить данные.
     load-json - загрузить данные из datasets
     sales   - показать продажи по автору
     exit    - выход
     ''')
     return
+
 
 run = True
 while run:
@@ -141,11 +138,10 @@ while run:
         load_data_from_json()
     elif i == 'drop':
         create_tables(engine, 'drop')
-    elif i == 'help':
+    elif i == 'help':  # .group_by(Publisher.name)\
         show_help()
     elif i == 'sales':
-        publ = input('введите издателя:')
-        # show_sales(publ)
-        show_sales()
+        publ = fr"{input('Введите издателя:')}"
+        show_sales(publ)
     elif i == 'exit':
         run = False
