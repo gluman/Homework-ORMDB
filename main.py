@@ -5,7 +5,7 @@
 
 import os
 import json
-
+from Settings import db_host, db_name, db_pass, db_login
 import sqlalchemy
 import sqlalchemy as sq
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
@@ -68,7 +68,7 @@ def create_tables(engine, command):
         Base.metadata.drop_all(engine)
 
 
-DSN = "postgresql+psycopg2://postgres:postgres@localhost:5432/ormdb"
+DSN = f"postgresql+psycopg2://{db_login}:{db_pass}@{db_host}:5432/{db_name}"
 engine = sqlalchemy.create_engine(DSN)
 create_tables(engine, 'create')
 Session = sessionmaker(bind=engine)
